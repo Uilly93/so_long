@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/06 16:41:13 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/07 17:26:34 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,23 +24,30 @@
 typedef	struct s_utils
 {
 	int		fd;
+	int		map_row;
+	int		map_col;
+	int		key_bind;
+	int		map_x;
+	int		map_y;
 	int		map_width;
 	int		map_height;
-	int		key_bind;
 	
 	char 	**map;
 	char	*path_sprites;
 	void	*sprites;
 	int		*sprite_width;
 	int		*sprite_height;
-	void	*background;
+	void	*floor;
 	void	*walls;
 	void	*exit;
 	void	*character;
 	void	*collectibles;
 	void	*mlx_ptr;
 	void	*win_ptr;
+	t_img	*canvas;
 	
 }	t_utils;
+
+# define TILE_SIZE 64
 
 #endif

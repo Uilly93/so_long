@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/07 15:52:42 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/05 13:32:22 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/07 09:30:48 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ void	ft_putchar_fd(char c, int fd);
 void	ft_putstr_fd(char *s, int fd);
 void	ft_putendl_fd(char *s, int fd);
 void	ft_putnbr_fd(int n, int fd);
+void	*ft_realloc(void *ptr, size_t size);
 
 typedef struct s_list
 {
