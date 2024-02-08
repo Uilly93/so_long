@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/07 17:33:05 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/08 18:09:09 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,6 +138,8 @@ int	display_collectible(t_utils *params) // LEAK
 			{
 				ft_put_floor(params, x, y);
 				ft_put_collectibles(params, x, y);
+				// params->collected += 1;
+				// ft_printf("%d\n", params->collected);
 			}
 			x++;
 		}
@@ -147,7 +149,33 @@ int	display_collectible(t_utils *params) // LEAK
 	return (0);
 }
 
-int	display_character(t_utils *params) // LEAK
+int	display_exit(t_utils *params) // LEAK
+{
+	int x = 0;
+	int y = 0;
+	while (params->map[y])
+	{
+		x = 0;
+		while (params->map[y][x])
+		{
+			if (params->map[y][x] == 'E')
+			{
+				ft_put_floor(params, x, y);
+				ft_put_exit(params, x, y);
+				params->door_x = x;
+				params->door_y = y;
+			}
+			x++;
+		}
+		y++;
+	}
+	// free(params->path_sprites);
+	return (0);
+}
+
+void	print_character(t_utils *params, int x, int y);
+
+void	get_pos_collectibles(t_utils *params)
 {
 	int x = 0;
 	int y = 0;
@@ -158,25 +186,44 @@ int	display_character(t_utils *params) // LEAK
 		{
 			if (params->map[y][x] == 'P')
 			{
-				ft_put_floor(params, x, y);
-				ft_put_character(params, x, y);
-				// ft_put_collectibles(params, x, y);
+				params->pos_x = x;
+				params->pos_y = y;
 			}
+			if(params->map[y][x] == 'C')
+				params->collected += 1;
 			x++;
 		}
 		y++;
 	}
-	// free(params->path_sprites);
-	return (0);
 }
+
+void	display_character(t_utils *params) // LEAK
+{
+	ft_put_floor(params, params->pos_x, params->pos_y);
+	ft_put_character(params, params->pos_x, params->pos_y);
+}
+
+// void	print_character(t_utils *params, int x, int y)
+// {
+// 	display_walls(params);
+// 	display_collectible(params); // LEAK
+// 	display_floor(params);
+// 	ft_put_character(params, x, y);
+// 	mlx_put_image_to_window(params->mlx_ptr, params->win_ptr, params->canvas, 0, 0);
+// }
+
+int	get_key(int key, t_utils *params);
 
 int	ft_display_map(t_utils *params)
 {
-
 	display_floor(params);
 	display_walls(params);
 	display_collectible(params); // LEAK
-	display_character(params); // LEAK
+	display_character(params);
+	if (params->collected == 0 && params->pos_x == params->door_x && params->pos_y == params->door_y)
+	{
+		
+	}
 	mlx_put_image_to_window(params->mlx_ptr, params->win_ptr, params->canvas, 0, 0);
 	return (0);
 }
@@ -261,42 +308,30 @@ char **parsing_map(t_utils *params) // inclure struc params->map
 	return (tmp_map);
 }
 
-// int	fill_map(t_utils *params)
-// {
-// 	params->map = parsing_map();
-// 	while (params->map[params->map_col])
-// 	{
-// 		while (params->map[params->map_col][params->map_row])
-// 		{
-// 			if(params->map[params->map_col][params->map_row] == '1')
-// 			{}
-// 			else if(params->map[params->map_col][params->map_row] == '0')
-// 			{}
-// 			else if(params->map[params->map_col][params->map_row] == 'C')
-// 			{}
-// 			else if(params->map[params->map_col][params->map_row] == 'P')
-// 			{}
-// 			else
-// 				ft_free_map(params->map);
-// 			params->map_row++;
-// 		}
-// 		params->map_col++;
-// 	}
-	
-// }
-// void	display_map(t_utils *params)
-// {
-	
-// }
-
 int	get_key(int key, t_utils *params)
 {
-	
-	// ft_printf("%d\n", key);
-	if (key == XK_w){} // go up
-	if (key == XK_s){} // go down
-	if (key == XK_a){} // go left
-	if (key == XK_d){} // go right
+	ft_put_floor(params, params->pos_x, params->pos_y);
+	if (key == XK_w && params->map[params->pos_y - 1][params->pos_x] != '1')
+		params->pos_y -= 1;
+	if (key == XK_s && params->map[params->pos_y + 1][params->pos_x] != '1')
+		params->pos_y += 1;
+	if (key == XK_a && params->map[params->pos_y][params->pos_x - 1] != '1')
+		params->pos_x -= 1;
+	if (key == XK_d && params->map[params->pos_y][params->pos_x + 1] != '1')
+		params->pos_x += 1;
+	if (params->map[params->pos_y][params->pos_x] == 'C')
+	{
+		params->map[params->pos_y][params->pos_x] = '0';
+		params->collected -= 1;
+		if(params->collected > 1)
+			ft_printf("il te reste %d doigts de Sukuna a manger\n", params->collected);
+		else if(params->collected == 1)
+			ft_printf("il te reste %d doigt de Sukuna a manger\n", params->collected);
+		else if (params->collected == 0)
+			ft_printf("tu as mange tout les doigts de Sukuna diriges toi vers la sortie\n");
+	}
+	params->step += 1;
+	ft_printf("nombre de pas : %d\n", params->step);
 	if (key == XK_Escape)
 		quit_game(params);
 	return (0);
@@ -312,12 +347,10 @@ int	init_window_hooks(t_utils *params)
 	params->map = parsing_map(params);
 	params->canvas = mlx_new_image(params->mlx_ptr, WINDOW_WIDTH, WINDOW_HEIGHT);
 	load_sprites(params);
-	mlx_key_hook(params->win_ptr, get_key, params);
 	mlx_hook(params->win_ptr, DestroyNotify, 0, quit_game, params);
+	get_pos_collectibles(params);
 	mlx_loop_hook(params->mlx_ptr, ft_display_map, params);
-	// display_background(params);
-	// parsing_line_count();
-	// ft_printf("%d", parsing_line_count());
+	mlx_key_hook(params->win_ptr, get_key, params);
 	mlx_loop(params->mlx_ptr);
 	// ft_free_map(params->map);
 	return (0);
@@ -331,7 +364,6 @@ int main(void)
 	// int		i;
 	
 	ft_bzero(&params, sizeof(params));
-
 	// params.map = parsing_map();
 	// i = 0;
 	// while(params.map[i])
@@ -344,6 +376,7 @@ int main(void)
 		// free(params.mlx_ptr);
 		exit(0);
 	}
+	// mlx_loop_hook(params.mlx_ptr, ft_display_map, &params);
 	mlx_destroy_window(params.mlx_ptr, params.win_ptr);
 	mlx_destroy_display(params.mlx_ptr);
 	// ft_free_map(params.map);

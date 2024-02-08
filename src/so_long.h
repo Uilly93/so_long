@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/07 17:26:34 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/08 17:36:24 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,13 @@ typedef	struct s_utils
 	int		map_y;
 	int		map_width;
 	int		map_height;
+	int		pos_x;
+	int		pos_y;
+	int		collected;
+	Bool	finish;
+	int		door_x;
+	int		door_y;
+	int		step;
 	
 	char 	**map;
 	char	*path_sprites;
@@ -40,6 +47,7 @@ typedef	struct s_utils
 	void	*floor;
 	void	*walls;
 	void	*exit;
+	void	*exit_open;
 	void	*character;
 	void	*collectibles;
 	void	*mlx_ptr;
