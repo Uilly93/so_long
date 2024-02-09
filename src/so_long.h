@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/08 17:36:24 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/09 14:24:48 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@
 
 typedef	struct s_utils
 {
-	int		fd;
+	// int		fd;
 	int		map_row;
 	int		map_col;
-	int		key_bind;
+	// int		key_bind;
 	int		map_x;
 	int		map_y;
 	int		map_width;
@@ -34,20 +34,21 @@ typedef	struct s_utils
 	int		pos_x;
 	int		pos_y;
 	int		collected;
-	Bool	finish;
+	int		door_count;
+	int		nb_character;
+	// Bool	finish;
 	int		door_x;
 	int		door_y;
 	int		step;
 	
 	char 	**map;
-	char	*path_sprites;
-	void	*sprites;
-	int		*sprite_width;
-	int		*sprite_height;
+	// char	*path_sprites;
+	// void	*sprites;
+	// int		*sprite_width;
+	// int		*sprite_height;
 	void	*floor;
 	void	*walls;
 	void	*exit;
-	void	*exit_open;
 	void	*character;
 	void	*collectibles;
 	void	*mlx_ptr;
