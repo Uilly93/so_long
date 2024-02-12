@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/12 12:03:34 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/12 13:54:49 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,7 +168,7 @@ int	get_pos(t_utils *params)
 	return (0);
 }
 
-void	display_character(t_utils *params) // LEAK
+void	display_character(t_utils *params)
 {
 	put_floor(params, params->pos_x, params->pos_y);
 	if(params->pos_x == params->door_x && params->pos_y == params->door_y)
@@ -176,7 +176,7 @@ void	display_character(t_utils *params) // LEAK
 	put_character(params, params->pos_x, params->pos_y);
 }
 
-void	display_door(t_utils *params) // LEAK
+void	display_door(t_utils *params)
 {
 	int w;
 	int h;
@@ -238,31 +238,31 @@ void	ft_free_map(char **map)
 	free(map);
 }
 
-int	parsing_line_count(void)
+int	parsing_line_count(t_utils *params)
 {
 	int		fd;
-	int 	count;
 	char 	*line;
 
-	count = 0;
 	fd = open("src/map.ber", O_RDONLY);
 	if(fd < 0)
-		return (0);
+		return (1);
 	while((line = get_next_line(fd)) != NULL)
 	{
 		free(line);
-		count++;
+		params->map_height++;
 	}
 	if(line)
 		free(line);
 	close(fd);
-	return (count);
+	return (0);
 }
 int	check_line(t_utils *params)
 {
 	int i;
 
 	i = 0;
+	if(!params->map)
+		return (1);
 	while (i < params->map_height)
 	{
 		if((int)ft_strlen(params->map[i]) - 1 == params->map_width)
@@ -273,7 +273,7 @@ int	check_line(t_utils *params)
 	return (0);
 }
 
-void	parsing_map(t_utils *params)
+int	parsing_map(t_utils *params)
 {
 	int 	fd;
 	int 	i;
@@ -282,11 +282,15 @@ void	parsing_map(t_utils *params)
 	i = 0;
 	fd = open("src/map.ber", O_RDONLY);
 	if(fd < 0)
-		return ;
-	params->map = ft_calloc(parsing_line_count() + 1, sizeof(char *));
+		return (1);
+	if(parsing_line_count(params))
+		return (1);
+	params->map = ft_calloc(params->map_height + 1, sizeof(char *));
 	if(!params->map)
-		return ;	
+		return (1);
 	line = get_next_line(fd);
+	if (!line)
+		return (close(fd), 1);
 	params->map[i++] = line;
 	while (line)
 	{
@@ -294,8 +298,8 @@ void	parsing_map(t_utils *params)
 		params->map[i++] = line;
 	}
 	params->map_width = ft_strlen(params->map[0]) - 1;
-	params->map_height = i;
 	close(fd);
+	return (0);
 }
 
 
@@ -327,11 +331,11 @@ int	check_error(t_utils *params)
 	// if(check_line(params, params->map))
 	// 	return (write(2, "Error:\nInvalid map", 18), 1); // segfault
 	if (params->nb_character != 1)
-		return (write(2, "Error:\nYou need to have only 1 character", 43), 1); // sortie erreur
+		return (write(2, "Error:\nYou need to have only 1 character\n", 41), 1); // sortie erreur
 	if (params->collected < 1)
-		return (write(2, "Error:\nThe map needs at least 1 collectible", 45), 1); // sortie erreur
+		return (write(2, "Error:\nThe map needs at least 1 collectible\n", 44), 1); // sortie erreur
 	if (params->door_count != 1)
-		return (write(2, "Error:\nThe map needs at least 1 exit door", 43), 1); // sortie erreur
+		return (write(2, "Error:\nThe map needs at least 1 exit door\n", 42), 1); // sortie erreur
 	if ((params->map_width > 20) || (params->map_height > 12))
 		return (write(2, "Error:\nInvalid map", 18), 1);
 	return (0);
@@ -414,8 +418,9 @@ int	get_key(int key, t_utils *params)
 }
 int	init_window_hooks(t_utils *params)
 {
-	parsing_map(params);
-	if(!params->map || params->map == 0)//|| check_line(params))
+	if(parsing_map(params))
+		return (1);
+	if(!params->map)//|| check_line(params))
 		return (1);
 	if(get_pos(params))
 		return (1);
