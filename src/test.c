@@ -6,20 +6,21 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/09 14:54:11 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/12 12:03:34 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "so_long.h"
+#include <stdlib.h>
+#include <unistd.h>
 
-// int	*call_end(t_utils *params)
-// {
-// 	mlx_loop_end(params->mlx_ptr);
-// 	return (0);
-// }
 int	check_error(t_utils *params);
 
-void destroy_images_map(t_utils *params); // plus de leak !
+void	display_door(t_utils *params); // LEAK
+
+void	display_character(t_utils *params); // LEAK
+
+void	destroy_images_map(t_utils *params);
 
 void    ft_draw_sprite(t_utils *params, t_img *img, int x, int y);
 
@@ -28,7 +29,6 @@ int		updating(void *params);
 void	put_wall(t_utils *params, int x, int y)
 {
 	ft_draw_sprite(params, params->walls, x * TILE_SIZE, y * TILE_SIZE);
-	// mlx_put_image_to_window(params->mlx_ptr, params->win_ptr, params->walls, x * TILE_SIZE, y * TILE_SIZE);
 }
 void	put_floor(t_utils *params, int x, int y)
 {
@@ -64,12 +64,14 @@ void    ft_draw_sprite(t_utils *params, t_img *img, int x, int y)
         j = -1;
         while (++j < img->height)
         {
-            if (j + y < 0 || j + y >= params->map_height * TILE_SIZE || i + x < 0 || i + x >= params->map_width * TILE_SIZE)
+            if (j + y < 0 || j + y >= params->map_height * TILE_SIZE || i + x < 0
+									|| i + x >= params->map_width * TILE_SIZE)
                 continue;
             color = ((int *)img->data)[(int)(j) * img->width + (int)(i)];
             if (color == 0xFF000000)
                 continue;
-            ((int *)params->canvas->data)[(y + j) * params->canvas->width + (x + i)] = color;
+            ((int *)params->canvas->data)[(y + j) * params->canvas->width + 
+																(x + i)] = color;
         }
         i++;
     }
@@ -81,26 +83,27 @@ int	quit_game(t_utils *params)
 	return (0);
 }
 
-int	display_walls(t_utils *params) // LEAK
+void	identify_sprites(t_utils *params, int x, int y)
 {
-	int x = 0;
-	int y = 0;
-	while (params->map[y])
+	if (params->map[y][x] == '1')
+		put_wall(params, x, y);
+	if (params->map[y][x] == '0')
+		put_floor(params, x, y);
+	if (params->map[y][x] == 'C')
 	{
-		x = 0;
-		while (params->map[y][x])
-		{
-			if (params->map[y][x] == '1')
-				put_wall(params, x, y);
-			x++;
-		}
-		y++;
+		put_floor(params, x, y);
+		put_collectibles(params, x, y);
 	}
-	// free(params->path_sprites);
-	return (0);
+	if (params->map[y][x] == 'E')
+	{
+		put_floor(params, x, y);
+		put_exit(params, x, y);
+	}
+	display_character(params);
+	display_door(params);
 }
 
-int	display_floor(t_utils *params) // LEAK
+int	display_sprites(t_utils *params)
 {
 	int x = 0;
 	int y = 0;
@@ -109,56 +112,11 @@ int	display_floor(t_utils *params) // LEAK
 		x = 0;
 		while (params->map[y][x])
 		{
-			if (params->map[y][x] == '0')
-				put_floor(params, x, y);
+			identify_sprites(params, x, y);
 			x++;
 		}
 		y++;
 	}
-	// free(params->path_sprites);
-	return (0);
-}
-
-int	display_collectible(t_utils *params) // LEAK
-{
-	int x = 0;
-	int y = 0;
-	while (params->map[y])
-	{
-		x = 0;
-		while (params->map[y][x])
-		{
-			if (params->map[y][x] == 'C')
-			{
-				put_floor(params, x, y);
-				put_collectibles(params, x, y);
-			}
-			x++;
-		}
-		y++;
-	}
-	return (0);
-}
-
-int	display_exit(t_utils *params) // LEAK
-{
-	int x = 0;
-	int y = 0;
-	while (params->map[y])
-	{
-		x = 0;
-		while (params->map[y][x])
-		{
-			if (params->map[y][x] == 'E')
-			{
-				put_floor(params, x, y);
-				put_exit(params, x, y);
-			}
-			x++;
-		}
-		y++;
-	}
-	// free(params->path_sprites);
 	return (0);
 }
 
@@ -235,24 +193,11 @@ void	display_door(t_utils *params) // LEAK
 	put_exit(params, params->door_x, params->door_y);
 }
 
-// void	print_character(t_utils *params, int x, int y)
-// {
-// 	display_walls(params);
-// 	display_collectible(params); // LEAK
-// 	display_floor(params);
-// 	put_character(params, x, y);
-// 	mlx_put_image_to_window(params->mlx_ptr, params->win_ptr, params->canvas, 0, 0);
-// }
-
 int	get_key(int key, t_utils *params);
 
 int	ft_display_map(t_utils *params)
 {
-	display_floor(params);
-	display_walls(params);
-	display_collectible(params); // LEAK
-	display_door(params);
-	display_character(params);
+	display_sprites(params);
 	mlx_put_image_to_window(params->mlx_ptr, params->win_ptr, \
 												params->canvas, 0, 0);
 	return (0);
@@ -313,36 +258,46 @@ int	parsing_line_count(void)
 	close(fd);
 	return (count);
 }
+int	check_line(t_utils *params)
+{
+	int i;
 
-char **parsing_map(t_utils *params) // inclure struc params->map
+	i = 0;
+	while (i < params->map_height)
+	{
+		if((int)ft_strlen(params->map[i]) - 1 == params->map_width)
+			i++;
+		else
+			return (1);
+	}
+	return (0);
+}
+
+void	parsing_map(t_utils *params)
 {
 	int 	fd;
 	int 	i;
 	char 	*line;
-	char	**tmp_map;
 
 	i = 0;
-	tmp_map = NULL;
 	fd = open("src/map.ber", O_RDONLY);
 	if(fd < 0)
-		return (NULL);
-	tmp_map = ft_calloc(parsing_line_count() + 1, sizeof(char *));
-	if(!tmp_map)
-		return (NULL);	
+		return ;
+	params->map = ft_calloc(parsing_line_count() + 1, sizeof(char *));
+	if(!params->map)
+		return ;	
 	line = get_next_line(fd);
-	tmp_map[i] = line;
-	i++;
+	params->map[i++] = line;
 	while (line)
 	{
 		line = get_next_line(fd);
-		tmp_map[i] = line;
-		i++;
+		params->map[i++] = line;
 	}
-	params->map_width = ft_strlen(tmp_map[0]) - 1;
+	params->map_width = ft_strlen(params->map[0]) - 1;
 	params->map_height = i;
 	close(fd);
-	return (tmp_map);
 }
+
 
 void	update_collectibles(t_utils *params)
 {
@@ -351,35 +306,34 @@ void	update_collectibles(t_utils *params)
 		params->map[params->pos_y][params->pos_x] = '0';
 		params->collected -= 1;
 		if(params->collected > 1)
-			ft_printf("il te reste %d doigts de Sukuna a manger\n", \
+			ft_printf("%d Sukuna's fingers remaining.\n", \
 						params->collected);
 		else if(params->collected == 1)
-			ft_printf("il te reste %d doigt de Sukuna a manger\n", \
+			ft_printf("%d Sukuna's finger remaining.\n", \
 						 params->collected);
 		else if (params->collected == 0)
-			ft_printf("tu as mange tout les doigts de " \
-						"Sukuna diriges toi vers la sortie\n");
+			ft_printf("you have eaten all Sukuna's " \
+						"fingers now go to the exit\n");
 	}
 }
-
-// void	print_while_moving(t_utils *params)
-// {
-	
-// }
 
 void	update_pos(t_utils *params)
 {
 	params->step += 1;
-	ft_printf("nombre de pas : %d\n", params->step);
+	ft_printf("steps : %d\n", params->step);
 }
 int	check_error(t_utils *params)
 {
+	// if(check_line(params, params->map))
+	// 	return (write(2, "Error:\nInvalid map", 18), 1); // segfault
 	if (params->nb_character != 1)
-		return (ft_printf("il y a trop ou aucuns personnages sur la map"), 1);
+		return (write(2, "Error:\nYou need to have only 1 character", 43), 1); // sortie erreur
 	if (params->collected < 1)
-		return (ft_printf("il faut au moins un collectible pour jouer"), 1);
+		return (write(2, "Error:\nThe map needs at least 1 collectible", 45), 1); // sortie erreur
 	if (params->door_count != 1)
-		return (ft_printf("la map doit contenir une seul porte de sortie"), 1);
+		return (write(2, "Error:\nThe map needs at least 1 exit door", 43), 1); // sortie erreur
+	if ((params->map_width > 20) || (params->map_height > 12))
+		return (write(2, "Error:\nInvalid map", 18), 1);
 	return (0);
 }
 
@@ -431,6 +385,17 @@ void	move_character(int key, t_utils *params)
 	}
 	update_collectibles(params);
 }
+// int	can_be_finished(t_utils *params, int x, int y)
+// {
+// 	int tmp_c;
+// 	int tmp_e;
+
+// 	tmp_c = 0;
+// 	tmp_e = 0;
+// 	x = params->pos_x;
+// 	y = params->pos_y;
+// 	if()
+// }
 
 int	get_key(int key, t_utils *params)
 {
@@ -439,8 +404,8 @@ int	get_key(int key, t_utils *params)
 	if (params->collected == 0 && params->pos_x == params->door_x 
 	&& params->pos_y == params->door_y)
 	{
-		ft_printf("Bravo tu as fini le jeu, " \
-					"si tu n'a pas encore vu Jujutsu Kaisen fonce le voir\n");
+		ft_printf("Congratulations, you've finished the game ! " \
+					"If you havn't watched Jujutsu Kaisen yet go for it\n");
 		quit_game(params);
 	}
 	if (key == XK_Escape)
@@ -449,6 +414,11 @@ int	get_key(int key, t_utils *params)
 }
 int	init_window_hooks(t_utils *params)
 {
+	parsing_map(params);
+	if(!params->map || params->map == 0)//|| check_line(params))
+		return (1);
+	if(get_pos(params))
+		return (1);
 	params->mlx_ptr =  mlx_init();
 	if (!params->mlx_ptr)
 		return(1);
@@ -456,12 +426,6 @@ int	init_window_hooks(t_utils *params)
 										WINDOW_HEIGHT, "so_long");
 	if (!params->win_ptr)
 		return(1);
-	params->map = parsing_map(params);
-	if(!params->map)
-		return (1);
-	get_pos(params);
-	if(check_error(params))
-		return (1);
 	params->canvas = mlx_new_image(params->mlx_ptr, WINDOW_WIDTH, WINDOW_HEIGHT);
 	load_sprites(params);
 	mlx_hook(params->win_ptr, DestroyNotify, 0, quit_game, params);
@@ -499,7 +463,7 @@ void destroy_images_map(t_utils *params) // plus de leak !
 int main(void)
 {
 	t_utils	params;
-		
+
 	ft_bzero(&params, sizeof(params));
 	if(init_window_hooks(&params))
 	{
