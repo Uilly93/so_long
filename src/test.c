@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/12 13:54:49 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/12 17:13:14 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -256,6 +256,29 @@ int	parsing_line_count(t_utils *params)
 	close(fd);
 	return (0);
 }
+int	check_walls(t_utils *params)
+{
+	int i;
+	
+	i = 0;
+	while (params->map[0][i] != '\0' && params->map[params->map_height][i] != '\0')
+	{
+		if (params->map[0][i] == '1' && params->map[params->map_height][i] == '1')
+			i++;
+		else
+			return (1);
+	}
+	i = 0;
+	while (i < params->map_height)
+	{
+		if(params->map[i][0] == '1' && params->map[i][params->map_width] == '1')
+			i++;
+		else
+			return(1);
+	}
+	return (0);
+}
+
 int	check_line(t_utils *params)
 {
 	int i;
@@ -263,6 +286,7 @@ int	check_line(t_utils *params)
 	i = 0;
 	if(!params->map)
 		return (1);
+	if(params->map[0])
 	while (i < params->map_height)
 	{
 		if((int)ft_strlen(params->map[i]) - 1 == params->map_width)
