@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/12 17:13:14 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/14 14:48:43 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include <unistd.h>
 
 int	check_error(t_utils *params);
+
+int	check_line(t_utils *params);
 
 void	display_door(t_utils *params); // LEAK
 
@@ -151,6 +153,8 @@ void	check_collectibles(t_utils *params)
 
 int	get_pos(t_utils *params)
 {
+	// if (check_line(params))
+	// 	return (1);
 	while (params->map[params->map_y])
 	{
 		params->map_x = 0;
@@ -210,14 +214,24 @@ void	load_sprites(t_utils *params)
 	
 	params->walls = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/wall.xpm", &width, &height);
+	if(!params->walls)
+		return ;
 	params->floor = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/floor.xpm", &width, &height);
+	if(!params->floor)
+		return ;
 	params->collectibles = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/collectible.xpm", &width, &height);
+	if(!params->collectibles)
+		return ;
 	params->character = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/p.xpm", &width, &height);
+	if(!params->character)
+		return ;
 	params->exit = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/exit.xpm", &width, &height);
+	if(!params->exit)
+		return ;
 }
 
 void close_window(t_utils *params)
@@ -238,12 +252,12 @@ void	ft_free_map(char **map)
 	free(map);
 }
 
-int	parsing_line_count(t_utils *params)
+int	parsing_line_count(t_utils *params, char *path)
 {
 	int		fd;
 	char 	*line;
 
-	fd = open("src/map.ber", O_RDONLY);
+	fd = open(path, O_RDONLY);
 	if(fd < 0)
 		return (1);
 	while((line = get_next_line(fd)) != NULL)
@@ -261,20 +275,33 @@ int	check_walls(t_utils *params)
 	int i;
 	
 	i = 0;
-	while (params->map[0][i] != '\0' && params->map[params->map_height][i] != '\0')
+	while (i < params->map_width)
 	{
-		if (params->map[0][i] == '1' && params->map[params->map_height][i] == '1')
-			i++;
-		else
+		if (params->map[0][i] != '1')
 			return (1);
+		i++;
 	}
 	i = 0;
-	while (i < params->map_height)
+	while (i < params->map_width)
 	{
-		if(params->map[i][0] == '1' && params->map[i][params->map_width] == '1')
-			i++;
-		else
-			return(1);
+		if (params->map[params->map_height - 1][i] != '1')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+int	check_map_edges(t_utils *params)
+{
+	int i;
+
+	i = 0;
+	while (i < params->map_height - 1)
+	{
+		if(params->map[i][0] != '1' || 
+				params->map[i][ft_strlen(params->map[i]) - 2] != '1')
+			return (1);
+		i++;
 	}
 	return (0);
 }
@@ -286,28 +313,33 @@ int	check_line(t_utils *params)
 	i = 0;
 	if(!params->map)
 		return (1);
-	if(params->map[0])
-	while (i < params->map_height)
+	while (i < params->map_height - 1)
 	{
 		if((int)ft_strlen(params->map[i]) - 1 == params->map_width)
+		{
+			if(params->map[i][ft_strlen(params->map[i]) - 1] != '\n')
+				return (1);
 			i++;
+		}
 		else
 			return (1);
 	}
+	if (check_walls(params) || check_map_edges(params))
+		return (1);
 	return (0);
 }
 
-int	parsing_map(t_utils *params)
+int	parsing_map(t_utils *params, char *path)
 {
 	int 	fd;
 	int 	i;
 	char 	*line;
 
 	i = 0;
-	fd = open("src/map.ber", O_RDONLY);
+	fd = open(path, O_RDONLY);
 	if(fd < 0)
 		return (1);
-	if(parsing_line_count(params))
+	if(parsing_line_count(params, path))
 		return (1);
 	params->map = ft_calloc(params->map_height + 1, sizeof(char *));
 	if(!params->map)
@@ -352,16 +384,16 @@ void	update_pos(t_utils *params)
 }
 int	check_error(t_utils *params)
 {
-	// if(check_line(params, params->map))
-	// 	return (write(2, "Error:\nInvalid map", 18), 1); // segfault
-	if (params->nb_character != 1)
-		return (write(2, "Error:\nYou need to have only 1 character\n", 41), 1); // sortie erreur
-	if (params->collected < 1)
-		return (write(2, "Error:\nThe map needs at least 1 collectible\n", 44), 1); // sortie erreur
-	if (params->door_count != 1)
-		return (write(2, "Error:\nThe map needs at least 1 exit door\n", 42), 1); // sortie erreur
 	if ((params->map_width > 20) || (params->map_height > 12))
-		return (write(2, "Error:\nInvalid map", 18), 1);
+		return (write(2, "Error:\nInvalid map\n", 19), 1);
+	if(check_line(params))
+		return (write(2, "Error:\nInvalid map\n", 19), 1);
+	if (params->nb_character != 1)
+		return (write(2, "Error:\nYou need to have only 1 character\n", 41), 1);
+	if (params->collected < 1)
+		return (write(2, "Error:\nMap needs at least 1 collectible\n", 40), 1);
+	if (params->door_count != 1)
+		return (write(2, "Error:\nMap needs at least 1 exit door\n", 38), 1);
 	return (0);
 }
 
@@ -442,10 +474,6 @@ int	get_key(int key, t_utils *params)
 }
 int	init_window_hooks(t_utils *params)
 {
-	if(parsing_map(params))
-		return (1);
-	if(!params->map)//|| check_line(params))
-		return (1);
 	if(get_pos(params))
 		return (1);
 	params->mlx_ptr =  mlx_init();
@@ -466,7 +494,6 @@ int	init_window_hooks(t_utils *params)
 
 void destroy_images_map(t_utils *params) // plus de leak !
 {
-	// quit_game(params);
 	if(params->character)
 		mlx_destroy_image(params->mlx_ptr, params->character);
 	if(params->floor)
@@ -489,16 +516,27 @@ void destroy_images_map(t_utils *params) // plus de leak !
 		free(params->mlx_ptr);
 }
 
-int main(void)
+int main(int ac, char **av)
 {
 	t_utils	params;
 
 	ft_bzero(&params, sizeof(params));
-	if(init_window_hooks(&params))
+	if(ac == 2)
 	{
-		destroy_images_map(&params);
-		exit(0);
+		if(parsing_map(&params, av[1]))
+		{
+			write(2, "Error:\nIncorrect map path\n", 26);
+			return (1);
+		}
+		if(!params.map)
+			return (1);
+		if(init_window_hooks(&params))
+		{
+			destroy_images_map(&params);
+			exit(0);
+		}
+		else
+			destroy_images_map(&params);
 	}
-	else
-		destroy_images_map(&params);
+	return (0);
 }

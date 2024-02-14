@@ -7,7 +7,7 @@ SRC = src/test.c
 OBJS = $(SRC:.c=.o)
 SPRITES = src/textures/floor.png src/textures/wall.png src/textures/collectible.png src/textures/p.png src/textures/rp.png src/textures/exit.png src/textures/open.png
 XPM = $(SPRITES:.png=.xpm)
-CFLAGS = -Wall -Wextra -Werror -g3
+CFLAGS = -Wall -Wextra -Werror -g3 -O2 -fno-builtin
 RM = rm -f
 
 all: minilibx libft $(NAME)
