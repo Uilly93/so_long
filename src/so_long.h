@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/14 14:45:22 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/15 11:32:11 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,19 @@ typedef	struct s_utils
 	t_img	*canvas;
 	
 }	t_utils;
+
+typedef struct s_check
+{
+	char	**map;
+	int		map_y;
+	int		map_x;
+	int		pos_x;
+	int		pos_y;
+	int		collected;
+	int		door_count;
+	int		nb_character;
+
+}	t_check;
 
 # define TILE_SIZE 64
 

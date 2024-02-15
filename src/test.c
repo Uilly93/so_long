@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/14 14:48:43 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/15 15:57:31 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void	display_door(t_utils *params); // LEAK
 
 void	display_character(t_utils *params); // LEAK
 
-void	destroy_images_map(t_utils *params);
+void	destroy_images_map(t_utils *params, t_check *check);
 
 void    ft_draw_sprite(t_utils *params, t_img *img, int x, int y);
 
@@ -101,8 +101,8 @@ void	identify_sprites(t_utils *params, int x, int y)
 		put_floor(params, x, y);
 		put_exit(params, x, y);
 	}
-	display_character(params);
 	display_door(params);
+	display_character(params);
 }
 
 int	display_sprites(t_utils *params)
@@ -150,8 +150,96 @@ void	check_collectibles(t_utils *params)
 		params->collected += 1;
 }
 
+int	check_input(char c)
+{
+	if (c != '1' && c != '0' && c != 'E' && c != 'C' && c != 'P' && c != '\n')
+		return (1);
+	return (0);
+}
 
-int	get_pos(t_utils *params)
+int	check_map(t_utils *params)
+{
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	while(params->map[i])
+	{
+		j = 0;
+		while(params->map[i][j])
+		{
+			if(check_input(params->map[i][j]) == 1)
+				return (1);
+			j++;
+		}
+		i++;
+	}
+	return (0);
+}
+void	get_check_pos(t_utils *params, t_check *check)
+{
+	int i;
+	
+	i = 0;
+	check->map = ft_calloc(params->map_height + 1, sizeof(char *));
+	if(!check->map)
+		return ;
+	while(i < params->map_height)
+	{
+		check->map[i] = ft_strdup(params->map[i]);
+		i++;
+	}
+	check->pos_x = params->pos_x;
+	check->pos_y = params->pos_y;
+}
+void print_map(char **map)
+{
+	int i;
+
+	i = 0;
+	while(map[i])
+		ft_putstr(map[i++]);
+}
+
+void	flood_fill(char **map, int x, int y)
+{
+	if(map[x][y] == '1' || map[x][y] == 'c')
+		return ;
+	else
+		map[x][y] = 'c';
+	flood_fill(map, x + 1, y);
+	flood_fill(map, x - 1, y);
+	flood_fill(map, x, y + 1);
+	flood_fill(map, x, y - 1);
+	return ;
+}
+
+int check_after_filled(char **map)
+{
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	while(map[i])
+	{
+		j = 0;
+		while(map[i][j])
+		{
+			if(map[i][j] == 'C' || map[i][j] == 'E')
+			{
+				write(2, "Error:\nMap can't be finished\n", 29);
+				return (1);
+			}
+			j++;
+		}
+		i++;
+	}
+	return (0);
+}
+
+int	get_pos(t_utils *params ,t_check *check)
 {
 	// if (check_line(params))
 	// 	return (1);
@@ -169,8 +257,18 @@ int	get_pos(t_utils *params)
 	}
 	if(check_error(params))
 		return (1);
+	get_check_pos(params, check);
+	flood_fill(check->map, check->pos_x, check->pos_y);
+	if(check_after_filled(check->map))
+		return(1);
 	return (0);
 }
+// void	print_map(t_check *check)
+// {
+	
+// }
+
+
 
 void	display_character(t_utils *params)
 {
@@ -257,16 +355,21 @@ int	parsing_line_count(t_utils *params, char *path)
 	int		fd;
 	char 	*line;
 
+	fd = open(path, O_RDONLY | O_DIRECTORY);
+	if (fd != -1)
+		return (close(fd), -1);
 	fd = open(path, O_RDONLY);
 	if(fd < 0)
 		return (1);
-	while((line = get_next_line(fd)) != NULL)
+	line = get_next_line(fd);
+	if(!line)
+		return(1);
+	while(line)
 	{
 		free(line);
+		line = get_next_line(fd);
 		params->map_height++;
 	}
-	if(line)
-		free(line);
 	close(fd);
 	return (0);
 }
@@ -343,7 +446,7 @@ int	parsing_map(t_utils *params, char *path)
 		return (1);
 	params->map = ft_calloc(params->map_height + 1, sizeof(char *));
 	if(!params->map)
-		return (1);
+		return (close(fd), 1);
 	line = get_next_line(fd);
 	if (!line)
 		return (close(fd), 1);
@@ -384,9 +487,11 @@ void	update_pos(t_utils *params)
 }
 int	check_error(t_utils *params)
 {
+	if (check_map(params))
+		return (write(2, "Error:\nInvalid map input\n", 25), 1);
 	if ((params->map_width > 20) || (params->map_height > 12))
-		return (write(2, "Error:\nInvalid map\n", 19), 1);
-	if(check_line(params))
+		return (write(2, "Error:\nToo big\n", 15), 1);
+	if (check_line(params))
 		return (write(2, "Error:\nInvalid map\n", 19), 1);
 	if (params->nb_character != 1)
 		return (write(2, "Error:\nYou need to have only 1 character\n", 41), 1);
@@ -445,7 +550,7 @@ void	move_character(int key, t_utils *params)
 	}
 	update_collectibles(params);
 }
-// int	can_be_finished(t_utils *params, int x, int y)
+// int	flood_fill(t_utils *params, int x, int y)
 // {
 // 	int tmp_c;
 // 	int tmp_e;
@@ -472,9 +577,9 @@ int	get_key(int key, t_utils *params)
 		quit_game(params);
 	return (0);
 }
-int	init_window_hooks(t_utils *params)
+int	init_window_hooks(t_utils *params, t_check *check)
 {
-	if(get_pos(params))
+	if(get_pos(params, check))
 		return (1);
 	params->mlx_ptr =  mlx_init();
 	if (!params->mlx_ptr)
@@ -492,7 +597,7 @@ int	init_window_hooks(t_utils *params)
 	return (0);
 }
 
-void destroy_images_map(t_utils *params) // plus de leak !
+void destroy_images_map(t_utils *params, t_check *check)
 {
 	if(params->character)
 		mlx_destroy_image(params->mlx_ptr, params->character);
@@ -508,6 +613,8 @@ void destroy_images_map(t_utils *params) // plus de leak !
 		mlx_destroy_image(params->mlx_ptr, params->canvas);
 	if(params->map)
 		ft_free_map(params->map);
+	if(check->map)
+		ft_free_map(check->map);
 	if(params->win_ptr)
 		mlx_destroy_window(params->mlx_ptr, params->win_ptr);
 	if(params->mlx_ptr)
@@ -519,8 +626,10 @@ void destroy_images_map(t_utils *params) // plus de leak !
 int main(int ac, char **av)
 {
 	t_utils	params;
+	t_check check;
 
 	ft_bzero(&params, sizeof(params));
+	ft_bzero(&check, sizeof(params));
 	if(ac == 2)
 	{
 		if(parsing_map(&params, av[1]))
@@ -530,13 +639,13 @@ int main(int ac, char **av)
 		}
 		if(!params.map)
 			return (1);
-		if(init_window_hooks(&params))
+		if(init_window_hooks(&params, &check))
 		{
-			destroy_images_map(&params);
+			destroy_images_map(&params, &check);
 			exit(0);
 		}
 		else
-			destroy_images_map(&params);
+			destroy_images_map(&params, &check);
 	}
 	return (0);
 }
