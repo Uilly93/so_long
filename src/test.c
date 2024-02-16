@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/15 15:57:31 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/16 15:08:56 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,11 @@ int	quit_game(t_utils *params)
 	mlx_loop_end(params->mlx_ptr);
 	return (0);
 }
+
+// void	check_next_to_walls(t_utils *params, int x, int y)
+// {
+	
+// }
 
 void	identify_sprites(t_utils *params, int x, int y)
 {
@@ -192,6 +197,8 @@ void	get_check_pos(t_utils *params, t_check *check)
 	}
 	check->pos_x = params->pos_x;
 	check->pos_y = params->pos_y;
+	check->max_x = params->map_width;
+	check->max_y = params->map_height - 1;
 }
 void print_map(char **map)
 {
@@ -202,17 +209,19 @@ void print_map(char **map)
 		ft_putstr(map[i++]);
 }
 
-void	flood_fill(char **map, int x, int y)
+int	flood_fill(t_check *map, int x, int y)
 {
-	if(map[x][y] == '1' || map[x][y] == 'c')
-		return ;
+	if (x < 0 || x > map->max_x || y < 0 || y > map->max_y)
+        return (1);
+	if(map->map[y][x] == '1' || map->map[y][x] == 'c')
+		return (1);
 	else
-		map[x][y] = 'c';
+		map->map[y][x] = 'c';
 	flood_fill(map, x + 1, y);
 	flood_fill(map, x - 1, y);
 	flood_fill(map, x, y + 1);
 	flood_fill(map, x, y - 1);
-	return ;
+	return (0);
 }
 
 int check_after_filled(char **map)
@@ -258,17 +267,12 @@ int	get_pos(t_utils *params ,t_check *check)
 	if(check_error(params))
 		return (1);
 	get_check_pos(params, check);
-	flood_fill(check->map, check->pos_x, check->pos_y);
+	if(flood_fill(check, check->pos_x, check->pos_y))
+		return (1);
 	if(check_after_filled(check->map))
 		return(1);
 	return (0);
 }
-// void	print_map(t_check *check)
-// {
-	
-// }
-
-
 
 void	display_character(t_utils *params)
 {
@@ -305,7 +309,7 @@ int	ft_display_map(t_utils *params)
 	return (0);
 }
 
-void	load_sprites(t_utils *params)
+int	load_sprites(t_utils *params)
 {
 	int height = TILE_SIZE;
 	int width = TILE_SIZE;
@@ -313,23 +317,24 @@ void	load_sprites(t_utils *params)
 	params->walls = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/wall.xpm", &width, &height);
 	if(!params->walls)
-		return ;
+		return (1);
 	params->floor = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/floor.xpm", &width, &height);
 	if(!params->floor)
-		return ;
+		return (1);
 	params->collectibles = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/collectible.xpm", &width, &height);
 	if(!params->collectibles)
-		return ;
+		return (1);
 	params->character = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/p.xpm", &width, &height);
 	if(!params->character)
-		return ;
+		return (1);
 	params->exit = mlx_xpm_file_to_image(params->mlx_ptr, \
 								"src/textures/exit.xpm", &width, &height);
 	if(!params->exit)
-		return ;
+		return (1);
+	return (0);
 }
 
 void close_window(t_utils *params)
@@ -399,7 +404,7 @@ int	check_map_edges(t_utils *params)
 	int i;
 
 	i = 0;
-	while (i < params->map_height - 1)
+	while (i < params->map_height)
 	{
 		if(params->map[i][0] != '1' || 
 				params->map[i][ft_strlen(params->map[i]) - 2] != '1')
@@ -416,7 +421,7 @@ int	check_line(t_utils *params)
 	i = 0;
 	if(!params->map)
 		return (1);
-	while (i < params->map_height - 1)
+	while (i < params->map_height)
 	{
 		if((int)ft_strlen(params->map[i]) - 1 == params->map_width)
 		{
@@ -489,7 +494,7 @@ int	check_error(t_utils *params)
 {
 	if (check_map(params))
 		return (write(2, "Error:\nInvalid map input\n", 25), 1);
-	if ((params->map_width > 20) || (params->map_height > 12))
+	if ((params->map_width > 20) || (params->map_height > 11))
 		return (write(2, "Error:\nToo big\n", 15), 1);
 	if (check_line(params))
 		return (write(2, "Error:\nInvalid map\n", 19), 1);
@@ -502,7 +507,7 @@ int	check_error(t_utils *params)
 	return (0);
 }
 
-void	switch_sprite(t_utils *params, int nb)
+int	switch_sprite(t_utils *params, int nb)
 {
 	int h;
 	int w;
@@ -521,11 +526,14 @@ void	switch_sprite(t_utils *params, int nb)
 		params->character = mlx_xpm_file_to_image(params->mlx_ptr, \
 												"src/textures/rp.xpm", &w, &h);
 	}
+	if(!params->character)
+		return (1);
+	return (0);
 }
 
-void	move_character(int key, t_utils *params)
+int	move_character(int key, t_utils *params)
 {
-		put_floor(params, params->pos_x, params->pos_y);
+	put_floor(params, params->pos_x, params->pos_y);
 	if (key == XK_w && params->map[params->pos_y - 1][params->pos_x] != '1')
 	{
 		params->pos_y -= 1;
@@ -538,17 +546,18 @@ void	move_character(int key, t_utils *params)
 	}
 	if (key == XK_a && params->map[params->pos_y][params->pos_x - 1] != '1')
 	{
-		switch_sprite(params, 0);
+		switch_sprite(params, 0); // remonter l'erreur (return (1);)
 		params->pos_x -= 1;
 		update_pos(params);
 	}
 	if (key == XK_d && params->map[params->pos_y][params->pos_x + 1] != '1')
 	{
-		switch_sprite(params, 1);
+		switch_sprite(params, 1); // remonter l'erreur (return (1);)
 		params->pos_x += 1;
 		update_pos(params);
 	}
 	update_collectibles(params);
+	return (0);
 }
 // int	flood_fill(t_utils *params, int x, int y)
 // {
@@ -564,7 +573,8 @@ void	move_character(int key, t_utils *params)
 
 int	get_key(int key, t_utils *params)
 {
-	move_character(key, params);
+	if(move_character(key, params))
+		return (1);
 	update_collectibles(params);
 	if (params->collected == 0 && params->pos_x == params->door_x 
 	&& params->pos_y == params->door_y)
@@ -584,12 +594,16 @@ int	init_window_hooks(t_utils *params, t_check *check)
 	params->mlx_ptr =  mlx_init();
 	if (!params->mlx_ptr)
 		return(1);
+	if(load_sprites(params))
+	{
+		write(2, "Error:\nSprites loading failed", 29);
+		return (1);
+	}
 	params->win_ptr = mlx_new_window(params->mlx_ptr, WINDOW_WIDTH,\
 										WINDOW_HEIGHT, "so_long");
 	if (!params->win_ptr)
 		return(1);
 	params->canvas = mlx_new_image(params->mlx_ptr, WINDOW_WIDTH, WINDOW_HEIGHT);
-	load_sprites(params);
 	mlx_hook(params->win_ptr, DestroyNotify, 0, quit_game, params);
 	mlx_loop_hook(params->mlx_ptr, ft_display_map, params);
 	mlx_key_hook(params->win_ptr, get_key, params);

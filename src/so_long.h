@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/15 11:32:11 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/16 11:08:36 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,8 @@ typedef struct s_check
 	int		map_x;
 	int		pos_x;
 	int		pos_y;
+	int		max_x;
+	int		max_y;
 	int		collected;
 	int		door_count;
 	int		nb_character;

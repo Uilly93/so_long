@@ -31,6 +31,8 @@ fclean: clean
 
 re: fclean all
 
+exe: re
+	./so_long map.ber
 minilibx:
 	$(MAKE) -C $(MINILIBX)
 
