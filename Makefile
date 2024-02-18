@@ -10,7 +10,6 @@ OBJS = $(SRC:.c=.o)
 SPRITES = textures/floor.xpm textures/wall.xpm \
 	textures/collectible.xpm textures/p.xpm textures/rp.xpm \
 	textures/exit.xpm textures/open.xpm
-# XPM = $(SPRITES:.png=.xpm)
 CFLAGS = -Wall -Wextra -Werror -g3 -O2 -fno-builtin
 RM = rm -f
 
@@ -18,10 +17,6 @@ all: minilibx libft $(NAME)
 
 $(NAME): $(OBJS) $(SPRITES)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) -L$(LIBFT) -lft -L$(MINILIBX) -lmlx -lmlx_Linux -lXext -lbsd -lm -lX11  
-
-# for file in *.png; do convert $file ${file%.png}.xpm; done
-# %.xpm : %.png
-# 	convert -scale 64x64 $< $@
 	
 clean:
 	$(RM) $(OBJS)
@@ -37,6 +32,9 @@ re: fclean all
 
 exe: re
 	./so_long map/map.ber
+
+valgrind: re
+	valgrind ./so_long map/map.ber
 
 minilibx:
 	$(MAKE) -C $(MINILIBX)

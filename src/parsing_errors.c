@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/18 10:35:52 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 10:36:29 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/18 11:02:32 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 void	get_check_pos(t_utils *params, t_check *check)
 {
-	int i;
-	
+	int	i;
+
 	i = 0;
 	check->map = ft_calloc(params->map_height + 1, sizeof(char *));
 	if (!check->map)
@@ -34,7 +34,7 @@ void	get_check_pos(t_utils *params, t_check *check)
 int	flood_fill(t_check *map, int x, int y)
 {
 	if (x < 0 || x > map->max_x || y < 0 || y > map->max_y)
-        return (1);
+		return (1);
 	if (map->map[y][x] == '1' || map->map[y][x] == 'c')
 		return (1);
 	else
@@ -46,10 +46,10 @@ int	flood_fill(t_check *map, int x, int y)
 	return (0);
 }
 
-int check_after_filled(char **map)
+int	check_after_filled(char **map)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = 0;
 	j = 0;

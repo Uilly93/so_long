@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 10:39:05 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/18 13:17:45 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # define WINDOW_WIDTH 1280
 # define WINDOW_HEIGHT 720
 
-typedef	struct s_utils
+typedef struct s_utils
 {
 	int		map_row;
 	int		map_col;
@@ -37,8 +37,10 @@ typedef	struct s_utils
 	int		door_count;
 	int		nb_character;
 	int		step;
+	int		height;
+	int		width;
 
-	char 	**map;
+	char	**map;
 	void	*floor;
 	void	*walls;
 	void	*exit;
@@ -48,7 +50,7 @@ typedef	struct s_utils
 	void	*mlx_ptr;
 	void	*win_ptr;
 	t_img	*canvas;
-	
+
 }	t_utils;
 
 typedef struct s_check
@@ -70,12 +72,12 @@ typedef struct s_check
 
 int		init_window_hooks(t_utils *params, t_check *check); //init_game.c
 int		load_sprites(t_utils *params);
-int		get_pos(t_utils *params ,t_check *check); //
-
+int		get_pos(t_utils *params, t_check *check);
 
 int		parsing_line_count(t_utils *params, char *path); //parsing_map.c
 int		parsing_map(t_utils *params, char *path);
-void	identify_sprites(t_utils *params, int x, int y); //
+void	identify_sprites(t_utils *params, int x, int y);
+void	ft_draw_sprite(t_utils *params, t_img *img, int x, int y);
 
 void	put_wall(t_utils *params, int x, int y); // draw_sprites.c
 void	put_floor(t_utils *params, int x, int y);
@@ -110,11 +112,8 @@ int		check_walls(t_utils *params);
 int		check_map_edges(t_utils *params);
 int		check_line(t_utils *params);
 
-
 void	get_check_pos(t_utils *params, t_check *check); //parsing_errors.c
 int		flood_fill(t_check *map, int x, int y);
 int		check_after_filled(char **map);
-
-
 
 #endif

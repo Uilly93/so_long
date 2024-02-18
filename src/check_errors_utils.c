@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/18 10:31:40 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 10:33:13 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/18 11:04:36 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ int	check_input(char c)
 
 int	check_map(t_utils *params)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = 0;
 	j = 0;
@@ -39,10 +39,11 @@ int	check_map(t_utils *params)
 	}
 	return (0);
 }
+
 int	check_walls(t_utils *params)
 {
-	int i;
-	
+	int	i;
+
 	i = 0;
 	while (i < params->map_width)
 	{
@@ -62,12 +63,12 @@ int	check_walls(t_utils *params)
 
 int	check_map_edges(t_utils *params)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < params->map_height)
 	{
-		if(params->map[i][0] != '1' || 
+		if (params->map[i][0] != '1' ||
 				params->map[i][ft_strlen(params->map[i]) - 2] != '1')
 			return (1);
 		i++;
@@ -77,7 +78,7 @@ int	check_map_edges(t_utils *params)
 
 int	check_line(t_utils *params)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	if (!params->map)
@@ -86,7 +87,7 @@ int	check_line(t_utils *params)
 	{
 		if ((int)ft_strlen(params->map[i]) - 1 == params->map_width)
 		{
-			if(params->map[i][ft_strlen(params->map[i]) - 1] != '\n')
+			if (params->map[i][ft_strlen(params->map[i]) - 1] != '\n')
 				return (1);
 			i++;
 		}

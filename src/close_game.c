@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/18 10:25:53 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 10:27:39 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/18 11:06:05 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ int	quit_game(t_utils *params)
 	mlx_loop_end(params->mlx_ptr);
 	return (0);
 }
+
 void	close_window(t_utils *params)
 {
 	mlx_hook(params->win_ptr, 17, 0, quit_game, &params);
@@ -24,8 +25,8 @@ void	close_window(t_utils *params)
 
 void	ft_free_map(char **map)
 {
-	int i;
-	
+	int	i;
+
 	i = 0;
 	while (map[i])
 	{
@@ -34,6 +35,7 @@ void	ft_free_map(char **map)
 	}
 	free(map);
 }
+
 void	destroy_images_map(t_utils *params, t_check *check)
 {
 	if (params->character)

@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/18 10:17:20 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 10:50:57 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/18 11:09:38 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,11 @@
 
 int	display_sprites(t_utils *params)
 {
-	int x = 0;
-	int y = 0;
+	int	x;
+	int	y;
+
+	x = 0;
+	y = 0;
 	while (params->map[y])
 	{
 		x = 0;
@@ -28,6 +31,7 @@ int	display_sprites(t_utils *params)
 	}
 	return (0);
 }
+
 int	ft_display_map(t_utils *params)
 {
 	display_sprites(params);
@@ -35,6 +39,7 @@ int	ft_display_map(t_utils *params)
 												params->canvas, 0, 0);
 	return (0);
 }
+
 void	display_character(t_utils *params)
 {
 	put_floor(params, params->pos_x, params->pos_y);
@@ -45,8 +50,8 @@ void	display_character(t_utils *params)
 
 void	display_door(t_utils *params)
 {
-	int w;
-	int h;
+	int	w;
+	int	h;
 
 	w = TILE_SIZE;
 	h = TILE_SIZE;
@@ -59,10 +64,11 @@ void	display_door(t_utils *params)
 	}
 	put_exit(params, params->door_x, params->door_y);
 }
+
 int	switch_sprite(t_utils *params, int nb)
 {
-	int h;
-	int w;
+	int	h;
+	int	w;
 
 	h = TILE_SIZE;
 	w = TILE_SIZE;
