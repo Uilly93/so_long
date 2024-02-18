@@ -23,7 +23,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
 
 $(NAME): $(OBJS) $(SPRITES)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) -L$(LIBFT) -lft -L$(MINILIBX) -lmlx -lmlx_Linux -lXext -lbsd -lm -lX11  
+	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) -L$(LIBFT) -lft -L$(MINILIBX) -lmlx \
+	-lmlx_Linux -lXext -lbsd -lm -lX11  
 	
 clean:
 	$(RM) $(OBJ_DIR)

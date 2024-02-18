@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/18 10:11:01 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 13:08:10 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/18 16:34:53 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,10 @@ int	init_window_hooks(t_utils *params, t_check *check)
 		return (1);
 	params->mlx_ptr = mlx_init();
 	if (!params->mlx_ptr)
+	{
+		write(2, "Error:\nGraphic environnement is needed.\n", 40);
 		return (1);
+	}
 	if (load_sprites(params))
 	{
 		write(2, "Error:\nSprites loading failed.\n", 31);
