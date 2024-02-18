@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/16 11:08:36 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/18 10:39:05 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,16 +68,53 @@ typedef struct s_check
 
 # define TILE_SIZE 64
 
-#endif
+int		init_window_hooks(t_utils *params, t_check *check); //init_game.c
+int		load_sprites(t_utils *params);
+int		get_pos(t_utils *params ,t_check *check); //
 
-// 11111111111111111111
-// 1000P00000000C100001
-// 1110000C00000010C001
-// 10000010000000100001
-// 11100000000001110001
-// 10000000000001100001
-// 10001010000100100001
-// 10000010000000100001
-// 1000000C0000C0000001
-// 100000000000110000E1
-// 11111111111111111111
+
+int		parsing_line_count(t_utils *params, char *path); //parsing_map.c
+int		parsing_map(t_utils *params, char *path);
+void	identify_sprites(t_utils *params, int x, int y); //
+
+void	put_wall(t_utils *params, int x, int y); // draw_sprites.c
+void	put_floor(t_utils *params, int x, int y);
+void	put_collectibles(t_utils *params, int x, int y);
+void	put_character(t_utils *params, int x, int y);
+void	put_exit(t_utils *params, int x, int y);
+
+int		display_sprites(t_utils *params); //display_sprites.c
+int		ft_display_map(t_utils *params);
+void	display_character(t_utils *params);
+void	display_door(t_utils *params);
+int		switch_sprite(t_utils *params, int nb);
+
+void	update_collectibles(t_utils *params); //loop_update.c
+void	update_pos(t_utils *params);
+int		move_character(int key, t_utils *params);
+int		get_key(int key, t_utils *params);
+
+int		quit_game(t_utils *params); //close_game.c
+void	close_window(t_utils *params);
+void	ft_free_map(char **map);
+void	destroy_images_map(t_utils *params, t_check *check);
+
+int		check_error(t_utils *params); //check_errors.c
+void	check_exit(t_utils *params);
+void	check_character(t_utils *params);
+void	check_collectibles(t_utils *params);
+
+int		check_input(char c); //check_errors_utils.c
+int		check_map(t_utils *params);
+int		check_walls(t_utils *params);
+int		check_map_edges(t_utils *params);
+int		check_line(t_utils *params);
+
+
+void	get_check_pos(t_utils *params, t_check *check); //parsing_errors.c
+int		flood_fill(t_check *map, int x, int y);
+int		check_after_filled(char **map);
+
+
+
+#endif
