@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:05 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 16:33:01 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:38:00 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	main(int ac, char **av)
 	t_check	check;
 
 	ft_bzero(&params, sizeof(params));
-	ft_bzero(&check, sizeof(params));
+	ft_bzero(&check, sizeof(check));
 	if (ac == 2)
 	{
 		if (parsing_map(&params, av[1]))
@@ -38,5 +38,7 @@ int	main(int ac, char **av)
 		else
 			destroy_images_map(&params, &check);
 	}
+	else
+		write(2, "Error:\nInvalid arguments\n", 25);
 	return (0);
 }
