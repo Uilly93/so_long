@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 14:10:12 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/18 13:17:45 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:52:40 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,6 @@
 
 typedef struct s_utils
 {
-	int		map_row;
-	int		map_col;
 	int		map_x;
 	int		map_y;
 	int		map_width;
@@ -56,15 +54,10 @@ typedef struct s_utils
 typedef struct s_check
 {
 	char	**map;
-	int		map_y;
-	int		map_x;
 	int		pos_x;
 	int		pos_y;
 	int		max_x;
 	int		max_y;
-	int		collected;
-	int		door_count;
-	int		nb_character;
 
 }	t_check;
 

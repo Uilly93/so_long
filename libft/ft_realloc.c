@@ -6,7 +6,7 @@
 /*   By: wnocchi <wnocchi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/06 17:00:08 by wnocchi           #+#    #+#             */
-/*   Updated: 2024/02/06 17:14:06 by wnocchi          ###   ########.fr       */
+/*   Updated: 2024/02/19 09:53:50 by wnocchi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	*ft_realloc(void *ptr, size_t size)
 {
-	void *reallocated;
+	void	*reallocated;
 
 	reallocated = ft_calloc(1, size);
 	if (!reallocated)
